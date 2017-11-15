@@ -1,0 +1,3 @@
+#!/bin/bash
+tar -xvf sav-linux-free-9.tgz -C /tmp/
+/tmp/sophos-av/./install.sh --acceptlicense --automatic /opt/sophos-av/
