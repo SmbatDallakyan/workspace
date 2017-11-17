@@ -6,4 +6,4 @@ nvm --version
 
 nvm install 6.9.4
 nvm current
-nvm use 6.9.4
+nvm alias default 6.9.4
