@@ -35,23 +35,14 @@ void deleteList(Node* list) {
 }
 
 void printList(Node* list) {
-    Node* nextNode = list;
     if(!list) {
         printf("List is empty\n");
     }
     while(list) {
-        nextNode = list;
-        for (int i = 0; i < 3 && nextNode; ++i) {
-            printf("%p %s %d", (void *) nextNode, ":" , nextNode -> val);
-            if(i < 2) {
-                printf(" -> ");
-            }
-            nextNode = nextNode -> next;
-        }
-        printf("\n");
+        printf("%p %s %d %s", (void *) list, ":" , list -> val, "-> ");
         list = list -> next;
     }
-    printf("\n");
+    printf("%s\n", "NULL");
 }
 
 Node* reverse(Node* list) {
@@ -69,6 +60,39 @@ Node* reverse(Node* list) {
         currentNode = nextNode;
     }
     return prevNode;
+}
+
+Node* reverseN(Node* list, int n) {
+    if(!list || n < 1) {
+        return list;
+    }
+    Node *head = list;
+    Node *currentNode = list->next;
+    Node *prevNode = list;
+    Node *nextNode = NULL;
+    Node *lastNStart = list;
+    Node *lastNEnd = list;
+    lastNEnd->next = NULL;
+    for (int i = 1; i < n && currentNode; ++i) {
+        nextNode = currentNode->next;
+        currentNode->next = prevNode;
+        prevNode = currentNode;
+        currentNode = nextNode;
+    }
+    head = prevNode;
+    while(currentNode) {
+        lastNStart = currentNode;
+        for (int i = 0; i < n && currentNode; ++i) {
+            nextNode = currentNode->next;
+            currentNode->next = prevNode;
+            prevNode = currentNode;
+            currentNode = nextNode;
+        }
+        lastNEnd->next = prevNode;
+        lastNEnd = lastNStart;
+        lastNEnd->next = NULL;
+    }
+    return head;
 }
 
 Node* shuffle(Node* list) {

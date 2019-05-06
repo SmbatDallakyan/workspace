@@ -1,6 +1,6 @@
 PROG=executable
 CC=gcc
-FLAGS=-Werror -pedantic -std=c99
+FLAGS=-Wall -Werror -pedantic -std=c99
 
 all: $(PROG)
 
