@@ -28,9 +28,11 @@ Node* initialize(Node* list, int n) {
 }
 
 void deleteList(Node* list) {
+    Node* next = list;
     while(list) {
+        next = list->next;
         free(list);
-        list = list -> next;
+        list = next;
     }
 }
 
