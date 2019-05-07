@@ -69,30 +69,22 @@ Node* reverseN(Node* list, int n) {
         return list;
     }
     Node *head = list;
-    Node *currentNode = list->next;
-    Node *prevNode = list;
+    Node *currentNode = list;
+    Node *prevNode = NULL;
     Node *nextNode = NULL;
     Node *lastNStart = list;
-    Node *lastNEnd = list;
-    lastNEnd->next = NULL;
-    for (int i = 1; i < n && currentNode; ++i) {
-        nextNode = currentNode->next;
-        currentNode->next = prevNode;
-        prevNode = currentNode;
-        currentNode = nextNode;
-    }
-    head = prevNode;
+    Node **lastNEnd = &head;
     while(currentNode) {
-        lastNStart = currentNode;
         for (int i = 0; i < n && currentNode; ++i) {
             nextNode = currentNode->next;
             currentNode->next = prevNode;
             prevNode = currentNode;
             currentNode = nextNode;
         }
-        lastNEnd->next = prevNode;
-        lastNEnd = lastNStart;
-        lastNEnd->next = NULL;
+        *lastNEnd = prevNode;
+        lastNStart->next = NULL;
+        lastNEnd = &(lastNStart->next);
+        lastNStart = currentNode;
     }
     return head;
 }
