@@ -1,6 +1,6 @@
 PROG=executable
 CC=g++
-FLAGS=-Wall -Werror
+FLAGS=-Wall -Werror -std=c++11
 
 all: $(PROG)
 

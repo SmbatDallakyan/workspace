@@ -5,10 +5,9 @@ int main() {
     std::string fileName = "expression.txt";
     std::string exprStr = readFromFile(fileName);
     std::queue<std::string> queue;
-    queue = parseString(exprStr, queue);
-    while(!queue.empty()){
-        std::cout<<queue.front()<<"\n";
-        queue.pop();
-    }
+    double result = 0;
+    parseString(exprStr, queue);
+    result = calculateExpr(queue);
+    std::cout << exprStr << " = " << result << "\n";
     return 0;
 }
