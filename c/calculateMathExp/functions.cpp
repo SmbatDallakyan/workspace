@@ -28,7 +28,7 @@ std::string readFromFile(std::string fileName) {
 }
 
 std::string getFunction(std::string token, int indexToStart = 0) {
-    const std::string functions[] = {"sin", "cos"};
+    const std::string functions[] = {"sin", "cos", "tg", "ctg", "pow", "log"};
     for(const std::string &function : functions) {
         if(token.substr(indexToStart, function.length()) == function) {
             return function;
@@ -41,6 +41,24 @@ bool isFunction(std::string token, int indexToStart = 0) {
     return getFunction(token, indexToStart).length();
 }
 
+int getArgumentCount(std::string token, int indexToStart = 0) {
+    token = getFunction(token, indexToStart);
+    const std::string functionsWithOneArg[] = {"sin", "cos", "tg", "ctg"};
+    const std::string functionsWithTwoArg[] = {"pow", "log"};
+
+    for(const std::string &function : functionsWithOneArg) {
+        if(token == function) {
+            return 1;
+        }
+    }
+    for(const std::string &function : functionsWithTwoArg) {
+        if(token == function) {
+            return 2;
+        }
+    }
+    return 0;
+}
+
 std::queue<std::string> parseString(std::string str, std::queue<std::string> &queue) {
     int strLength = str.length();
     std::string currentNumber = "";
@@ -49,12 +67,12 @@ std::queue<std::string> parseString(std::string str, std::queue<std::string> &qu
         if(isdigit(str[i]) || str[i] == '.') {
             currentNumber += str[i];
         } else if (str[i] == '(' || str[i] == ')' || str[i] == '+' || str[i] == '-'
-                || str[i] == '*' || str[i] == '/' || str[i] == '^') {
+                || str[i] == '*' || str[i] == '/' || str[i] == '^' || str[i] == ',') {
             if (currentNumber.length()){
                 queue.push(currentNumber);
             }
-            queue.push(std::string(1, str[i]));
             currentNumber = "";
+            queue.push(std::string(1, str[i]));
         } else if(isFunction(str, i)) {
             currentfunction = getFunction(str, i);
             queue.push(currentfunction);
@@ -118,11 +136,15 @@ bool isLeftAssociative(std::string token) {
     return false;
 }
 
-std::string calculate(std::string rightOperand, std::string leftOperand, std::string oper) {
+double logN(double base, double x) {
+    return std::log(x) / std::log(base);
+}
+
+std::string calculate(std::string function, std::string leftOperand, std::string rightOperand) {
     double rightOperandDouble = atof(rightOperand.c_str());
     double leftOperandDouble = atof(leftOperand.c_str());
     double result = 0;
-    switch (oper[0]) {
+    switch (function[0]) {
     case '+':
         result = leftOperandDouble + rightOperandDouble;
         break;
@@ -138,20 +160,27 @@ std::string calculate(std::string rightOperand, std::string leftOperand, std::st
     case '^':
         result = pow(leftOperandDouble, rightOperandDouble);
         break;
-    default:
-        break;
+    }
+    if (function == "log"){
+        result = logN(leftOperandDouble, rightOperandDouble);
+    }
+    if (function == "pow"){
+        result = pow(leftOperandDouble, rightOperandDouble);
     }
     return std::to_string(result);
 }
 
-std::string calculate(std::string operand, std::string function) {
+std::string calculate(std::string function, std::string operand) {
     double operandDouble = atof(operand.c_str());
     double result = 0;
     if (function == "sin") {
-        result = sin(operandDouble*3.14159/180);
-    }
-    if (function == "cos") {
+        result = sin(operandDouble);
+    } else if (function == "cos") {
         result = cos(operandDouble);
+    } if (function == "tg") {
+        result = tan(operandDouble);
+    } if (function == "ctg") {
+        result = tan(M_PI_2 - operandDouble);
     }
     return std::to_string(result);
 }
@@ -221,13 +250,19 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                 operatorStack.pop();
                 leftOperend = operatorStack.top();
                 operatorStack.pop();
-                token = calculate(rightOperend, leftOperend, token);
+                token = calculate(token, leftOperend, rightOperend);
                 operatorStack.push(token);
                 break;
             case FUNCTION:
                 rightOperend = operatorStack.top();
                 operatorStack.pop();
-                token = calculate(rightOperend, token);
+                if(getArgumentCount(token) == 2) {
+                    leftOperend = operatorStack.top();
+                    operatorStack.pop();
+                    token = calculate(token, leftOperend, rightOperend);
+                } else {
+                    token = calculate(token, rightOperend);
+                }
                 operatorStack.push(token);
             default:
                 break;
