@@ -17,8 +17,13 @@
 #define PARAMETER_ID 7
 #define COMMA_ID 8
 
+#define INVALID_EXPRESSION "Invalid expression: Please enter the valid expression."
+#define INVALID_ARGUMENTS "Invalid arguments: "
+#define INVALID_PARENS "Invalid parens: Please enter the valid expression."
+#define ERROR_FILE_READ "Error, Can't read file with name "
+
 void exitWithErrorMessage(std::string message) {
-    std::cerr << message << "\n";
+    std::cerr << "\n" << message << "\n";
     exit(1);
 }
 
@@ -28,7 +33,7 @@ std::string readFromFile(std::string fileName) {
     if (infile.good()) {
         getline(infile, sLine);
     } else {
-        exitWithErrorMessage("Error, Can't read file with name " + fileName);
+        exitWithErrorMessage(ERROR_FILE_READ + fileName);
     }
     infile.close();
     return sLine;
@@ -114,6 +119,9 @@ int getTokenId(std::string token) {
 std::queue<std::string> parseString(std::string str, std::queue<std::string> &queue) {
     str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
     int strLength = str.length();
+    if(!strLength) {
+        exitWithErrorMessage(INVALID_EXPRESSION);
+    }
     std::string currentNumber = "";
     std::string currentfunction = "";
     for(int i = 0; i < strLength; ++i) {
@@ -223,7 +231,7 @@ std::string calculate(std::string function, std::string leftOperand, std::string
             break;
     }
     if(std::isnan(result) || std::isinf(result)) {
-        exitWithErrorMessage("Error, invalid arguments >> " + leftOperand + function  + rightOperand);
+        exitWithErrorMessage(INVALID_ARGUMENTS + leftOperand + function  + rightOperand);
     }
     if (function == "log"){
         result = logN(leftOperandDouble, rightOperandDouble);
@@ -232,8 +240,7 @@ std::string calculate(std::string function, std::string leftOperand, std::string
         result = pow(leftOperandDouble, rightOperandDouble);
     }
     if(std::isnan(result) || std::isinf(result)) {
-        exitWithErrorMessage("Error, invalid function arguments >> " +
-            function + "(" + leftOperand + "," + rightOperand + ")");
+        exitWithErrorMessage(INVALID_ARGUMENTS + function + "(" + leftOperand + "," + rightOperand + ")");
     }
     return std::to_string(result);
 }
@@ -242,7 +249,7 @@ std::string calculate(std::string function, std::string operand) {
     double operandDouble = atof(operand.c_str());
     double result = 0;
     //  Calculate using degree
-    // operandDouble = operandDouble * M_PI / 180;
+    operandDouble = operandDouble * M_PI / 180;
     if (function == "sin") {
         result = sin(operandDouble);
     } else if (function == "cos") {
@@ -266,6 +273,9 @@ double calculateExpr(std::string exprStr) {
 }
 
 double calculateExpr(std::queue<std::string>& exprQueue) {
+    if(exprQueue.empty()) {
+        exitWithErrorMessage(INVALID_EXPRESSION);
+    }
     std::queue<std::string> outputQueue;
     std::stack<std::string> operatorStack;
     std::string token = "";
@@ -294,17 +304,20 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                 break;
             case LEFT_PAREN_ID:
                 operatorStack.push(token);
+                if(exprQueue.front() == ")") {
+                    exitWithErrorMessage(INVALID_PARENS);
+                }
                 break;
             case RIGHT_PAREN_ID:
                 if(operatorStack.empty()) {
-                    exitWithErrorMessage("Error: Invalid parens: Please enter the valid expression\n");
+                    exitWithErrorMessage(INVALID_PARENS);
                 }
                 while(!operatorStack.empty() && getTokenId(operatorStack.top()) != LEFT_PAREN_ID) {
                     outputQueue.push(operatorStack.top());
                     operatorStack.pop();
                 }
                 if(operatorStack.empty()) {
-                    exitWithErrorMessage("Error: Invalid parens: Please enter the valid expression\n");
+                    exitWithErrorMessage(INVALID_PARENS);
                 } else {
                     operatorStack.pop();
                 }
@@ -323,7 +336,7 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
     while (!operatorStack.empty()) {
         token = operatorStack.top();
         if (token == "(") {
-            exitWithErrorMessage("Errore: Invalid opening paren");
+            exitWithErrorMessage(INVALID_PARENS);
         }
         outputQueue.push(token);
         operatorStack.pop();
@@ -337,10 +350,15 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                 operatorStack.push(token);
                 break;
             case OPERATOR_ID:
+                if(operatorStack.empty()) {
+                    exitWithErrorMessage(INVALID_EXPRESSION);
+                }
                 rightOperend = operatorStack.top();
                 operatorStack.pop();
                 if(token == "-" && (operatorStack.empty() || !isDigit(operatorStack.top()) )){
                     leftOperend = "0";
+                } else if (operatorStack.empty()) {
+                    exitWithErrorMessage(INVALID_EXPRESSION);
                 } else {
                     leftOperend = operatorStack.top();
                     operatorStack.pop();
@@ -349,9 +367,15 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                 operatorStack.push(token);
                 break;
             case FUNCTION_ID:
+                if (operatorStack.empty()) {
+                    exitWithErrorMessage(INVALID_EXPRESSION);
+                }
                 rightOperend = operatorStack.top();
                 operatorStack.pop();
                 if(getArgumentCount(token) == 2) {
+                    if (operatorStack.empty()) {
+                        exitWithErrorMessage(INVALID_EXPRESSION);
+                    }
                     leftOperend = operatorStack.top();
                     operatorStack.pop();
                     token = calculate(token, leftOperend, rightOperend);
@@ -370,6 +394,9 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
     }
     rightOperend = operatorStack.top();
     operatorStack.pop();
+    if(!operatorStack.empty()) {
+        exitWithErrorMessage(INVALID_EXPRESSION);
+    }
     result = atof(rightOperend.c_str());
     return result;
 }

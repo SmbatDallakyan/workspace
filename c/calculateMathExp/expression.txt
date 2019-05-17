@@ -1,1 +1,1 @@
-pow(16, sin(pow(900,0.5)))3
+(log(pow(sin(1), -cos(2)), tg(1) / ctg(2)) + 4) * pow(2.5, 10)
