@@ -130,12 +130,22 @@ std::queue<std::string> parseString(std::string str, std::queue<std::string> &qu
                 isDigit(queue.back())))) {
                 queue.push("*");
             }
-            queue.push(std::string(1, str[i]));
+            if (str[i] == '-' && (queue.empty() || queue.back() == "(" || queue.back() == "," )) {
+                queue.push("-1");
+                queue.push("*");
+            } else {
+                queue.push(std::string(1, str[i]));
+            }
             if (i < strLength - 1 && str[i] == ')' &&
                 (isalpha(str[i+1]) || isdigit(str[i+1]))) {
                 queue.push("*");
             }
         } else if(isFunction(str, i)) {
+            if (currentNumber.length()){
+                queue.push(currentNumber);
+                currentNumber = "";
+                queue.push("*");
+            }
             currentfunction = getFunction(str, i);
             queue.push(currentfunction);
             i += currentfunction.length()-1;
@@ -249,6 +259,11 @@ std::string calculate(std::string function, std::string operand) {
 std::string getParameterValue(std::string paramName){
     return "10";
 }
+double calculateExpr(std::string exprStr) {
+    std::queue<std::string> queue;
+    parseString(exprStr, queue);
+    return calculateExpr(queue);
+}
 
 double calculateExpr(std::queue<std::string>& exprQueue) {
     std::queue<std::string> outputQueue;
@@ -281,11 +296,16 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                 operatorStack.push(token);
                 break;
             case RIGHT_PAREN_ID:
-                while(getTokenId(operatorStack.top()) != LEFT_PAREN_ID) {
+                if(operatorStack.empty()) {
+                    exitWithErrorMessage("Error: Invalid parens: Please enter the valid expression\n");
+                }
+                while(!operatorStack.empty() && getTokenId(operatorStack.top()) != LEFT_PAREN_ID) {
                     outputQueue.push(operatorStack.top());
                     operatorStack.pop();
                 }
-                if(getTokenId(operatorStack.top()) == LEFT_PAREN_ID) {
+                if(operatorStack.empty()) {
+                    exitWithErrorMessage("Error: Invalid parens: Please enter the valid expression\n");
+                } else {
                     operatorStack.pop();
                 }
                 break;
@@ -301,7 +321,11 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
         }
     }
     while (!operatorStack.empty()) {
-        outputQueue.push(operatorStack.top());
+        token = operatorStack.top();
+        if (token == "(") {
+            exitWithErrorMessage("Errore: Invalid opening paren");
+        }
+        outputQueue.push(token);
         operatorStack.pop();
     }
 
@@ -315,7 +339,7 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
             case OPERATOR_ID:
                 rightOperend = operatorStack.top();
                 operatorStack.pop();
-                if(token[0] == '-' && (operatorStack.empty() || isDigit(operatorStack.top()) )){
+                if(token == "-" && (operatorStack.empty() || !isDigit(operatorStack.top()) )){
                     leftOperend = "0";
                 } else {
                     leftOperend = operatorStack.top();
