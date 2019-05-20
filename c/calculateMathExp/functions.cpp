@@ -6,6 +6,8 @@
 #include <stack>
 #include <cmath>
 #include <algorithm>
+#include <map>
+#include <bits/stdc++.h>
 #include "functions.hpp"
 
 #define DIGIT_ID 1
@@ -20,23 +22,43 @@
 #define INVALID_EXPRESSION "Invalid expression: Please enter the valid expression."
 #define INVALID_ARGUMENTS "Invalid arguments: "
 #define INVALID_PARENS "Invalid parens: Please enter the valid expression."
+#define INVALID_VARIABLES "Invalid variables/parameters"
 #define ERROR_FILE_READ "Error, Can't read file with name "
+#define UNDEFINED_VARIABLE "Undefined variable "
 
 void exitWithErrorMessage(std::string message) {
     std::cerr << "\n" << message << "\n";
     exit(1);
 }
 
+bool isParameter(std::string variableName) {
+    return variableName.length() == 1 &&
+            ((variableName[0] >= 65 && variableName[0] <= 79) ||
+            (variableName[0] >= 97 && variableName[0] <= 111));
+}
+
+bool isVariable(std::string variableName) {
+    return variableName.length() == 1 &&
+            ((variableName[0] >= 80 && variableName[0] <= 90) ||
+            (variableName[0] >= 112 && variableName[0] <= 122));
+}
+
 std::string readFromFile(std::string fileName) {
     std::ifstream infile(fileName.c_str());
-    std::string sLine;
+    std::string result = "";
+    std::string expression = "";
+    std::string variableNames = "";
+    std::string variableValues = "";
     if (infile.good()) {
-        getline(infile, sLine);
+        getline(infile, expression);
+        getline(infile, variableNames);
+        getline(infile, variableValues);
     } else {
         exitWithErrorMessage(ERROR_FILE_READ + fileName);
     }
     infile.close();
-    return sLine;
+    result = expression + "|" + variableNames + "|" + variableValues;
+    return result;
 }
 
 std::string getFunction(std::string token, int indexToStart = 0) {
@@ -105,19 +127,52 @@ int getTokenId(std::string token) {
     if (isFunction(token)) {
         return FUNCTION_ID;
     }
-    if (token.length() == 1 &&
-        ((token[0] >= 65 && token[0] <= 79) || (token[0] >= 97 && token[0] <= 111))) {
+    if (isParameter(token)) {
         return PARAMETER_ID;
     }
-    if (token.length() == 1 &&
-        ((token[0] >= 80 && token[0] <= 90) || (token[0] >= 112 && token[0] <= 122))) {
+    if (isVariable(token)) {
         return VARIABLE_ID;
     }
     return 0;
 }
 
-std::queue<std::string> parseString(std::string str, std::queue<std::string> &queue) {
+void initializeVariables(std::string &variableNames,
+                        std::string &variableValues,
+                        std::map<std::string, std::string> &variables,
+                        std::map<std::string, std::string> &parameters) {
+    std::stringstream names(variableNames);
+    std::stringstream values(variableValues);
+    std::string name = "";
+    std::string value = "";
+    while(std::getline(names, name, ',') && std::getline(values, value, ',') ){
+        if(isVariable(name)) {
+            std::cout<<name<<":"<<value<<"\n";
+            variables.insert(std::pair<std::string, std::string>(name, value));
+        } else if (isParameter(name)) {
+            std::cout<<name<<":"<<value<<"\n";
+            parameters.insert(std::pair<std::string, std::string>(name, value));
+        } else {
+            exitWithErrorMessage("invalid Variables");
+        }
+    }
+    return;
+}
+
+std::queue<std::string> parseString(std::string str,
+                                    std::queue<std::string> &queue,
+                                    std::map<std::string, std::string> &variables,
+                                    std::map<std::string, std::string> &parameters) {
     str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
+    std::string variableNames = "";
+    std::string variableValues = "";
+    std::string expression = "";
+    std::string token = "";
+    std::stringstream check1(str);
+    expression = std::getline(check1, token, '|') ? token : "";
+    variableNames = std::getline(check1, token, '|') ? token : "";
+    variableValues = std::getline(check1, token, '|') ? token : "";
+    initializeVariables(variableNames, variableValues, variables, parameters);
+    str = expression;
     int strLength = str.length();
     if(!strLength) {
         exitWithErrorMessage(INVALID_EXPRESSION);
@@ -262,17 +317,33 @@ std::string calculate(std::string function, std::string operand) {
     return std::to_string(result);
 }
 
-// --- TO DO --- Implement get parameters and variables
-std::string getParameterValue(std::string paramName){
-    return "10";
-}
-double calculateExpr(std::string exprStr) {
-    std::queue<std::string> queue;
-    parseString(exprStr, queue);
-    return calculateExpr(queue);
+std::string getVariableValue(std::string variableName, std::map<std::string, std::string> variables) {
+    std::map<std::string, std::string>::iterator variable;
+    for (variable = variables.begin(); variable != variables.end(); ++variable) {
+        if(variable->first == variableName) {
+            return variable->second;
+        }
+    }
+    return "";
 }
 
 double calculateExpr(std::queue<std::string>& exprQueue) {
+    std::map<std::string, std::string> variables;
+    std::map<std::string, std::string> parameters;
+    return calculateExpr(exprQueue, variables, parameters);
+}
+
+double calculateExpr(std::string exprStr) {
+    std::queue<std::string> queue;
+    std::map<std::string, std::string> variables;
+    std::map<std::string, std::string> parameters;
+    parseString(exprStr, queue, variables, parameters);
+    return calculateExpr(queue, variables, parameters);
+}
+
+double calculateExpr(std::queue<std::string>& exprQueue,
+                    std::map<std::string, std::string> variables,
+                    std::map<std::string, std::string> parameters) {
     if(exprQueue.empty()) {
         exitWithErrorMessage(INVALID_EXPRESSION);
     }
@@ -281,6 +352,7 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
     std::string token = "";
     std::string rightOperend = "";
     std::string leftOperend = "";
+    std::string value = "";
     double result = 0;
     while(!exprQueue.empty()){
         token = exprQueue.front();
@@ -295,7 +367,8 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                 while(!operatorStack.empty() && operatorStack.top() != "(" && (
                         isFunction(operatorStack.top()) ||
                         getOperatorPrecedence(token) < getOperatorPrecedence(operatorStack.top()) ||
-                        (getOperatorPrecedence(token) == getOperatorPrecedence(operatorStack.top()) && isLeftAssociative(operatorStack.top()))
+                        (getOperatorPrecedence(token) == getOperatorPrecedence(operatorStack.top()) &&
+                        isLeftAssociative(operatorStack.top()))
                     )) {
                     outputQueue.push(operatorStack.top());
                     operatorStack.pop();
@@ -320,10 +393,23 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                     exitWithErrorMessage(INVALID_PARENS);
                 } else {
                     operatorStack.pop();
+                    token = "*";
+                    if (!exprQueue.empty() && exprQueue.front() == "(") {
+                            while(!operatorStack.empty() && (
+                                    isFunction(operatorStack.top()) ||
+                                    getOperatorPrecedence(token) < getOperatorPrecedence(operatorStack.top()) ||
+                                    (getOperatorPrecedence(token) == getOperatorPrecedence(operatorStack.top()) &&
+                                    isLeftAssociative(operatorStack.top()))
+                                )) {
+                                outputQueue.push(operatorStack.top());
+                                operatorStack.pop();
+                            }
+                        operatorStack.push(token);
+                    }
                 }
                 break;
             case COMMA_ID:
-                while(getTokenId(operatorStack.top()) != LEFT_PAREN_ID) {
+                while(!operatorStack.empty() && getTokenId(operatorStack.top()) != LEFT_PAREN_ID) {
                     outputQueue.push(operatorStack.top());
                     operatorStack.pop();
                 }
@@ -385,8 +471,18 @@ double calculateExpr(std::queue<std::string>& exprQueue) {
                 operatorStack.push(token);
                 break;
             case VARIABLE_ID:
+                value = getVariableValue(token, variables);
+                if(value == "") {
+                    exitWithErrorMessage(UNDEFINED_VARIABLE + token);
+                }
+                operatorStack.push(value);
+                break;
             case PARAMETER_ID:
-                operatorStack.push(getParameterValue(token));
+                value = getVariableValue(token, parameters);
+                if(value == "") {
+                    exitWithErrorMessage(UNDEFINED_VARIABLE + token);
+                }
+                operatorStack.push(value);
                 break;
             default:
                 break;

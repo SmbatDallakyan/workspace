@@ -14,7 +14,16 @@ static std::string expressions[] = {
     "-sin(-30+60)+7",
     "cos(sin(30) *  120)",
     "cos(6*(10sin(30) + 10cos(60)))",
-    "(log(pow(sin(1), -cos(2)), tg(1) / ctg(2)) + 4) * pow(2.5, 10)"
+    "(log(pow(sin(1), -cos(2)), tg(1) / ctg(2)) + 4) * pow(2.5, 10)",
+    "(11+4)(2+1)",
+    "sin(5+25)(4)",
+    "log(5,125)",
+    "pow(6,2)",
+    "18+7(3-2*4)",
+    "10log(2,8)+3sin(30)",
+    "8*(7+tg(45)*3)",
+    "(log(2*(tg(45), cos(60)*16)))+3*7",
+    "sin(ax)+cos(bx)+pow(x,c) | x,a,b,c | 2,15,30,3"
 };
 
 static double results[] = {
@@ -29,7 +38,16 @@ static double results[] = {
     6.5,
     0.5,
     0.5,
-    20699.04327
+    20699.04327,
+    45,
+    2,
+    3,
+    36,
+    -17,
+    31.5,
+    80,
+    24,
+    9
 };
 
 void runTests() {

@@ -6,8 +6,10 @@ int main() {
     std::string exprStr = readFromFile(fileName);
     std::queue<std::string> queue;
     double result = 0;
-    parseString(exprStr, queue);
-    result = calculateExpr(queue);
-    std::cout << exprStr << " = " << result << "\n";
+    std::map<std::string, std::string> variables;
+    std::map<std::string, std::string> parameters;
+    parseString(exprStr, queue, variables, parameters);
+    result = calculateExpr(queue, variables, parameters);
+    std::cout << exprStr.substr(0, exprStr.find('|')) << " = " << result << "\n";
     return 0;
 }
