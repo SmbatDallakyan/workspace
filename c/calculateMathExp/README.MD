@@ -15,10 +15,24 @@ For cleaning generated files type:
 make clean
 ```
 
+For running tests:
+
+```bash
+make test
+./test
+```
+
 ## Usage
 
-Create the `expression.txt` file containing the mathematical expression.<br />
-Note: please enter the valid expression.<br />
+Create the `expression.txt` file containing the mathematical expression with following format.<br />
+- mathematical `Expression` | names of `variables` and `parameters` | values of `variables` and `parameters` <br/> Separate by comma.
+
+E.g.
+```
+sin(ax)+cos(bx)+pow(x,c) | x,a,b,c | 2,15,30,3
+```
+
+
 Run
 
 ```bash

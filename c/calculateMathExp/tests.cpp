@@ -1,6 +1,7 @@
 #include "iostream"
-#include "functions.hpp"
 #include <cmath>
+
+#include "calculator.hpp"
 
 static std::string expressions[] = {
     "5+7",
@@ -23,7 +24,9 @@ static std::string expressions[] = {
     "10log(2,8)+3sin(30)",
     "8*(7+tg(45)*3)",
     "(log(2*(tg(45), cos(60)*16)))+3*7",
-    "sin(ax)+cos(bx)+pow(x,c) | x,a,b,c | 2,15,30,3"
+    "sin(ax)+cos(bx)+pow(x,c) | x,a,b,c | 2,15,30,3",
+    "5xylog(2,8) | x,y | 2,3",
+    "log(x,8)(2+8) | x | 2"
 };
 
 static double results[] = {
@@ -47,7 +50,9 @@ static double results[] = {
     31.5,
     80,
     24,
-    9
+    9,
+    90,
+    30
 };
 
 void runTests() {
@@ -74,9 +79,9 @@ void runTests() {
             ++pass;
         }
     }
-    std::cout<<"\nTest cases : " << pass + fails <<'\n';
-    std::cout<<green<<"Pass : " << pass << reset << '\n';
-    std::cout<<red<<"Fail : " << fails << reset <<"\n\n";
+    std::cout << "\nTest cases : " << pass + fails <<'\n';
+    std::cout << green<<"Pass : " << pass << reset << '\n';
+    std::cout << red<<"Fail : " << fails << reset <<"\n\n";
 }
 
 int main() {

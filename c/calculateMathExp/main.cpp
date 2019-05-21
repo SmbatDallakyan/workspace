@@ -1,5 +1,9 @@
 #include <iostream>
-#include "functions.hpp"
+#include <map>
+
+#include "calculator.hpp"
+#include "parser.hpp"
+#include "helper.hpp"
 
 int main() {
     std::string fileName = "expression.txt";
