@@ -1,0 +1,3 @@
+sin(ax)+cos(bx)+pow(x,c)
+x,a,b,c
+2,15,30,3
