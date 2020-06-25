@@ -11,13 +11,15 @@ const toolController = require('../controllers/tool');
 router.get('/:id', async (req, res, next) => {
     try {
         const tool = await toolController.getTool(req.params.id);
-        res.status(HttpStatus.OK).json({
-            message: 'tool found',
-            body: tool
+        const status = tool ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        const message = tool ? 'tool found' : 'tool not found';
+        res.status(status).json({
+            message: message,
+            tool: tool
         });
     } catch (e) {
         console.log(e.message);
-        res.status(HttpStatus.NOT_FOUND).json({
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             message: e.message
         });
     }
@@ -32,7 +34,7 @@ router.get('/', async (req, res, next) => {
         const tools = await toolController.getAllTools();
         res.status(HttpStatus.OK).json({
             message: 'All tools',
-            body: tools
+            tools: tools
         });
     } catch (e) {
         console.log(e.message);
