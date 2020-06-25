@@ -1,0 +1,22 @@
+#tools_table {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#tools_table td, #tools_table th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#tools_table tr:nth-child(even){background-color: #f2f2f2;}
+
+#tools_table tr:hover {background-color: #ddd;}
+
+#tools_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}

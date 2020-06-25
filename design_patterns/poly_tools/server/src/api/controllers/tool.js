@@ -3,10 +3,14 @@ const Tool = require('../../models/Tool');
 
 module.exports = {
     createNewTool: async (tool) => {
+        const ID_KEY = '_id';
+        if (ID_KEY in tool) {
+            delete tool[ID_KEY]
+        }
         const new_tool = new Tool(
             Object.assign(
                 {},
-                {_id: new mongoose.Types.ObjectId()},
+                {ID_KEY: new mongoose.Types.ObjectId()},
                 tool
             ));
         try {
