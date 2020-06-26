@@ -3,10 +3,14 @@
   <head>
     <title>Poly Tools</title>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script type="text/javascript" src="script.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   </head>
-  
+
   <body>
     <table id="tools_table">
       <thead>
@@ -14,10 +18,13 @@
           <th>Tool Name</th>
           <th>Status</th>
           <th>Commands</th>
+          <th>Actions</th>
         </tr>
       </thead>
-
     </table>
-    
+    <a href="#" id="btn_add_row" class="float">
+      <i class="fa fa-plus my-float"></i>
+    </a>
   </body>
-</html>
+  <script type="text/javascript" src="script.js"></script>
+  </html>
